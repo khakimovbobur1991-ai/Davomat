@@ -118,28 +118,24 @@ const REASONS=[
   {v:"VAQT",l:"Ishga ma'lum muddat kechroq kelishi",c:"#fbbf24"},
 ];
 
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjFT-O4dy-rFqJcvML69ZadzEWfp-D8Nm1PqCi4O_NxxPppZ_2lMqzuq4fqgQ_OUZo/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzw9kWsBAqAs0DRAsXr3DeJUwfeGIqGnSy9CXhIJS-3d1Q95EEsknCEPXVE8AF_Fhj_/exec";
 const SLOTS={ua:28,ub:28,pps1:17,pps2:13,cleaning:14};
 const LS_KEY="davomat_records_v2";
 
 function saveToLS(recs){try{localStorage.setItem(LS_KEY,JSON.stringify(recs));}catch(e){}}
 function loadFromLS(){try{const d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):{}}catch(e){return{};}}
 
-// Google Sheets ga saqlash
+// Google Sheets ga saqlash (GET orqali - CORS muammosi yoq)
 async function saveToSheet(record) {
   try {
-    // URLSearchParams orqali yuborish - CORS muammosini hal qiladi
-    const params = new URLSearchParams();
-    params.append("data", JSON.stringify(record));
-    const res = await fetch(SHEET_URL, {
-      method: "POST",
-      body: params,
-      mode: "no-cors"
-    });
-    console.log("Sheet saqlandi");
+    const url = SHEET_URL + "?data=" + encodeURIComponent(JSON.stringify(record));
+    const res = await fetch(url);
+    const json = await res.json();
+    if(json.ok) { console.log("Sheet saqlandi"); }
+    else { console.log("Sheet xatosi:", json.error); showToast("Sheets xatosi: " + json.error); }
   } catch(e) {
     console.log("Sheet saqlash xatosi:", e);
-    showToast("⚠️ Sheets ulanmadi, local saqlandi");
+    showToast("Sheets ulanmadi, local saqlandi");
   }
 }
 
